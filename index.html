@@ -1,0 +1,2290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>华洋达物流 - 登录原型</title>
+  <link rel="stylesheet" href="./admin.css">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f7fc;
+      --panel: rgba(255, 255, 255, 0.9);
+      --panel-strong: rgba(255, 255, 255, 0.98);
+      --line: rgba(28, 43, 64, 0.12);
+      --line-strong: rgba(28, 43, 64, 0.2);
+      --text: #172033;
+      --muted: #667386;
+      --muted-2: #39475b;
+      --orange: #ff8a1d;
+      --orange-2: #ffb15f;
+      --blue: #6bb7ff;
+      --green: #53d39b;
+      --red: #ff6b6b;
+      --shadow: 0 24px 70px rgba(48, 71, 101, 0.18);
+      --radius: 8px;
+      --font: "Inter", "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    html.login-qr-mode,
+    body.login-qr-mode {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .page {
+      position: relative;
+      width: calc(100vw - var(--prd-width));
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(248, 251, 255, 0.78), rgba(248, 251, 255, 0.54) 44%, rgba(248, 251, 255, 0.92)),
+        url("./assets/logistics-hero.png") center / cover no-repeat;
+    }
+
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 26% 24%, rgba(255, 138, 29, 0.16), transparent 28%),
+        radial-gradient(circle at 68% 18%, rgba(107, 183, 255, 0.22), transparent 28%),
+        linear-gradient(rgba(25, 49, 81, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(25, 49, 81, 0.05) 1px, transparent 1px);
+      background-size: auto, auto, 64px 64px, 64px 64px;
+      mask-image: linear-gradient(90deg, black, black 70%, transparent);
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: auto -18% -32% 12%;
+      height: 46%;
+      border-radius: 999px;
+      background: rgba(255, 138, 29, 0.18);
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+      gap: clamp(32px, 6vw, 92px);
+      align-items: center;
+      min-height: 100vh;
+      padding: clamp(28px, 5vw, 64px);
+    }
+
+    body.login-qr-mode .page {
+      height: 100vh;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    body.login-qr-mode .shell {
+      height: 100vh;
+      min-height: 0;
+    }
+
+    .brand {
+      position: absolute;
+      top: clamp(22px, 4vw, 42px);
+      left: clamp(24px, 5vw, 64px);
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: #172033;
+    }
+
+    .logo-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255, 255, 255, 0.68);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255, 138, 29, 0.95), rgba(255, 177, 95, 0.72));
+      box-shadow: 0 14px 32px rgba(255, 138, 29, 0.24);
+      color: #10151f;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: rgba(23, 32, 51, 0.64);
+      letter-spacing: 0;
+    }
+
+    .hero {
+      align-self: end;
+      max-width: 680px;
+      padding-top: 76px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      padding: 0 14px;
+      border: 1px solid rgba(28, 43, 64, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: rgba(23, 32, 51, 0.78);
+      font-size: 13px;
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 18px rgba(255, 138, 29, 0.9);
+    }
+
+    .hero h1 {
+      max-width: 650px;
+      margin: 22px 0 16px;
+      font-size: clamp(42px, 6vw, 74px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      color: #122033;
+      text-wrap: balance;
+    }
+
+    .hero p {
+      max-width: 560px;
+      margin: 0;
+      color: rgba(32, 45, 66, 0.76);
+      font-size: clamp(16px, 1.4vw, 18px);
+      line-height: 1.72;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 610px;
+      margin-top: 34px;
+    }
+
+    .metric {
+      min-height: 92px;
+      padding: 16px;
+      border: 1px solid rgba(28, 43, 64, 0.12);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(16px);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #172033;
+      font-size: clamp(22px, 2.2vw, 30px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      color: rgba(39, 53, 74, 0.66);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .login-card {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 249, 253, 0.94));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      overflow: hidden;
+    }
+
+    .login-card__top {
+      padding: 28px 28px 16px;
+      border-bottom: 1px solid rgba(28, 43, 64, 0.08);
+    }
+
+    .login-card__top h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .login-card__top p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 22px;
+      padding: 4px;
+      border: 1px solid rgba(28, 43, 64, 0.1);
+      border-radius: 8px;
+      background: rgba(28, 43, 64, 0.05);
+    }
+
+    .tab {
+      min-height: 40px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted-2);
+      font-size: 13px;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .tab[aria-selected="true"] {
+      background: linear-gradient(135deg, rgba(255, 138, 29, 0.95), rgba(255, 177, 95, 0.9));
+      color: #141922;
+      font-weight: 800;
+      box-shadow: 0 10px 24px rgba(255, 138, 29, 0.26);
+    }
+
+    .login-body {
+      padding: 24px 28px 28px;
+    }
+
+    .page.is-qr-active .login-body {
+      padding-top: 18px;
+      padding-bottom: 24px;
+    }
+
+    .notice {
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      min-height: 44px;
+      margin-bottom: 16px;
+      padding: 11px 12px;
+      border: 1px solid rgba(39, 130, 214, 0.22);
+      border-radius: 8px;
+      background: rgba(107, 183, 255, 0.12);
+      color: #25547f;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .notice.is-visible {
+      display: flex;
+    }
+
+    .notice.is-error {
+      border-color: rgba(220, 68, 68, 0.34);
+      background: rgba(255, 107, 107, 0.1);
+      color: #9d2828;
+    }
+
+    .notice.is-success {
+      border-color: rgba(38, 160, 104, 0.28);
+      background: rgba(83, 211, 155, 0.13);
+      color: #1f7752;
+    }
+
+    .notice-mark {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
+      border-radius: 50%;
+      background: rgba(23, 32, 51, 0.08);
+      color: currentColor;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.is-active {
+      display: block;
+      animation: panelIn 0.24s ease both;
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      color: rgba(23, 32, 51, 0.86);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      border: 1px solid rgba(28, 43, 64, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .input-wrap:focus-within {
+      border-color: rgba(255, 138, 29, 0.78);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 138, 29, 0.13);
+    }
+
+    .input-wrap.is-invalid {
+      border-color: rgba(255, 107, 107, 0.86);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+    }
+
+    .input-wrap input {
+      width: 100%;
+      min-width: 0;
+      height: 46px;
+      padding: 0 14px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #172033;
+      font-size: 15px;
+    }
+
+    .input-wrap input::placeholder {
+      color: rgba(87, 101, 120, 0.58);
+    }
+
+    .input-prefix {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      margin-left: 13px;
+      padding-right: 12px;
+      border-right: 1px solid rgba(28, 43, 64, 0.12);
+      color: rgba(23, 32, 51, 0.66);
+      font-size: 14px;
+    }
+
+    .icon-btn {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-right: 5px;
+      border-radius: 7px;
+      background: transparent;
+      color: rgba(23, 32, 51, 0.56);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(28, 43, 64, 0.07);
+      color: #172033;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .field-error {
+      min-height: 18px;
+      color: #cf3f3f;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .split-input {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 118px;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .captcha-btn {
+      height: 48px;
+      align-self: start;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 138, 29, 0.34);
+      background: linear-gradient(135deg, rgba(255, 248, 240, 0.98), rgba(255, 234, 210, 0.92));
+      color: #172033;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .captcha-btn:hover {
+      border-color: rgba(255, 138, 29, 0.72);
+      box-shadow: 0 10px 22px rgba(255, 138, 29, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .captcha-canvas {
+      width: 118px;
+      height: 48px;
+      display: block;
+    }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 2px 0 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    .check input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .check-box {
+      display: grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      border: 1px solid rgba(28, 43, 64, 0.24);
+      border-radius: 4px;
+      background: #fff;
+      color: #141922;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .check input:checked + .check-box {
+      border-color: var(--orange);
+      background: var(--orange);
+    }
+
+    .text-btn {
+      padding: 0;
+      background: transparent;
+      color: #c96710;
+      font-size: 13px;
+    }
+
+    .text-btn:hover {
+      color: #172033;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .primary-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 50px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff8a1d, #ffb15f);
+      color: #111823;
+      font-size: 15px;
+      font-weight: 850;
+      box-shadow: 0 16px 36px rgba(255, 138, 29, 0.26);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 40px rgba(255, 138, 29, 0.32);
+      filter: brightness(1.03);
+    }
+
+    .primary-btn:disabled {
+      cursor: wait;
+      opacity: 0.78;
+    }
+
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(17, 24, 35, 0.28);
+      border-top-color: #111823;
+      border-radius: 50%;
+      animation: spin 0.72s linear infinite;
+    }
+
+    .primary-btn.is-loading .spinner {
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0 18px;
+      color: rgba(23, 32, 51, 0.42);
+      font-size: 12px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(28, 43, 64, 0.1);
+    }
+
+    .login-meta {
+      display: grid;
+      gap: 14px;
+    }
+
+    .copyright-info {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      border: 1px solid rgba(28, 43, 64, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.58);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .language-switch {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 4px;
+      border: 1px solid rgba(28, 43, 64, 0.12);
+      border-radius: 8px;
+      background: rgba(28, 43, 64, 0.05);
+    }
+
+    .locale-option {
+      min-height: 38px;
+      border-radius: 6px;
+      background: transparent;
+      color: rgba(23, 32, 51, 0.68);
+      font-size: 13px;
+      font-weight: 720;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .locale-option.is-active {
+      background: #fff;
+      color: #172033;
+      box-shadow: 0 8px 22px rgba(42, 65, 93, 0.12);
+    }
+
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      border: 1px solid rgba(28, 43, 64, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      color: rgba(23, 32, 51, 0.78);
+      font-size: 13px;
+      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .ghost-btn:hover {
+      border-color: rgba(255, 138, 29, 0.48);
+      background: rgba(255, 138, 29, 0.1);
+      color: #172033;
+    }
+
+    .qr-panel {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      padding: 6px 0 0;
+      text-align: center;
+    }
+
+    .page.is-qr-active .qr-panel {
+      gap: 12px;
+      padding-top: 0;
+    }
+
+    .qr-wrap {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: min(68vw, 222px);
+      aspect-ratio: 1;
+      padding: 14px;
+      border: 1px solid rgba(28, 43, 64, 0.14);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 42px rgba(42, 65, 93, 0.18);
+      overflow: hidden;
+    }
+
+    .qr-code {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      background:
+        linear-gradient(90deg, #111 10px, transparent 10px) 0 0 / 24px 24px,
+        linear-gradient(#111 10px, transparent 10px) 0 0 / 24px 24px,
+        conic-gradient(from 90deg, #111 25%, transparent 0 50%, #111 0 75%, transparent 0) 8px 8px / 32px 32px,
+        #fff;
+      filter: contrast(1.2);
+    }
+
+    .qr-corner {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      border: 9px solid #111;
+      background: #fff;
+    }
+
+    .qr-corner::after {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      background: #111;
+    }
+
+    .qr-corner.tl {
+      top: 22px;
+      left: 22px;
+    }
+
+    .qr-corner.tr {
+      top: 22px;
+      right: 22px;
+    }
+
+    .qr-corner.bl {
+      bottom: 22px;
+      left: 22px;
+    }
+
+    .qr-state {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(5, 10, 18, 0.76);
+      color: #fff;
+      text-align: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .qr-wrap.is-expired .qr-state {
+      display: grid;
+    }
+
+    .qr-wrap.is-success .qr-state {
+      display: grid;
+      background: rgba(14, 117, 77, 0.82);
+    }
+
+    .qr-state-inner {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      font-size: 14px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    .mini-btn {
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #111823;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .qr-title {
+      margin: 0;
+      color: #172033;
+      font-size: 16px;
+      font-weight: 780;
+    }
+
+    .qr-copy {
+      max-width: none;
+      margin: -8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: nowrap;
+    }
+
+    .qr-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
+    .progress {
+      position: relative;
+      width: 100%;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(28, 43, 64, 0.1);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--orange));
+      transform-origin: left center;
+      transform: scaleX(1);
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      background: rgba(19, 29, 45, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      backdrop-filter: blur(2px);
+    }
+
+    .drawer-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .forgot-drawer {
+      position: fixed;
+      inset: 0 0 0 auto;
+      z-index: 16;
+      display: flex;
+      flex-direction: column;
+      width: min(420px, calc(100vw - 28px));
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 253, 0.96));
+      border-left: 1px solid rgba(28, 43, 64, 0.12);
+      box-shadow: -24px 0 72px rgba(37, 55, 82, 0.22);
+      transform: translateX(104%);
+      transition: transform 0.28s ease;
+    }
+
+    .forgot-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 28px 24px 18px;
+      border-bottom: 1px solid rgba(28, 43, 64, 0.08);
+    }
+
+    .drawer-head h3 {
+      margin: 0 0 8px;
+      color: #172033;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .drawer-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .drawer-close {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(28, 43, 64, 0.06);
+      color: rgba(23, 32, 51, 0.72);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .drawer-close:hover {
+      background: rgba(255, 138, 29, 0.12);
+      color: #172033;
+    }
+
+    .forgot-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 24px 24px;
+    }
+
+    .reset-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .reset-step {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .reset-step-dot {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(28, 43, 64, 0.14);
+      background: rgba(255, 255, 255, 0.72);
+      color: rgba(23, 32, 51, 0.6);
+      font-weight: 820;
+    }
+
+    .reset-step.is-active {
+      color: #172033;
+      font-weight: 760;
+    }
+
+    .reset-step.is-active .reset-step-dot,
+    .reset-step.is-complete .reset-step-dot {
+      border-color: rgba(255, 138, 29, 0.5);
+      background: linear-gradient(135deg, #ff8a1d, #ffb15f);
+      color: #111823;
+    }
+
+    .forgot-step {
+      display: none;
+    }
+
+    .forgot-step.is-active {
+      display: block;
+      animation: panelIn 0.24s ease both;
+    }
+
+    .drawer-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .drawer-actions .primary-btn,
+    .drawer-actions .ghost-btn {
+      min-height: 46px;
+    }
+
+    .drawer-actions .primary-btn:only-child {
+      grid-column: 1 / -1;
+    }
+
+    .success-state {
+      display: grid;
+      justify-items: center;
+      gap: 12px;
+      padding: 34px 6px 10px;
+      text-align: center;
+    }
+
+    .success-mark {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: rgba(83, 211, 155, 0.16);
+      color: #1f7752;
+    }
+
+    .success-state h4 {
+      margin: 6px 0 0;
+      color: #172033;
+      font-size: 19px;
+      line-height: 1.3;
+    }
+
+    .success-state p {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 20;
+      right: 24px;
+      bottom: 24px;
+      display: grid;
+      gap: 4px;
+      min-width: min(360px, calc(100vw - 32px));
+      max-width: 420px;
+      padding: 14px 16px;
+      border: 1px solid rgba(28, 43, 64, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 46px rgba(42, 65, 93, 0.22);
+      color: #172033;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast strong {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .toast span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        min-height: 100svh;
+      }
+
+      .shell {
+        grid-template-columns: 1fr;
+        align-content: center;
+        gap: 26px;
+        padding-top: 92px;
+      }
+
+      .hero {
+        align-self: auto;
+        max-width: 100%;
+        padding-top: 0;
+      }
+
+      .hero h1 {
+        max-width: 760px;
+      }
+
+      .login-card {
+        max-width: 520px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: 100vw;
+      }
+
+      .brand {
+        left: 18px;
+        right: 18px;
+      }
+
+      .brand-name {
+        font-size: 16px;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .shell {
+        padding: 84px 16px 24px;
+      }
+
+      .hero h1 {
+        font-size: 38px;
+      }
+
+      .hero p {
+        font-size: 15px;
+      }
+
+      .metric-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .metric {
+        min-height: 72px;
+      }
+
+      .login-card__top,
+      .login-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .tab {
+        min-height: 38px;
+      }
+
+      .split-input {
+        grid-template-columns: 1fr;
+      }
+
+      .form-options {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .qr-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .drawer-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .toast {
+        right: 16px;
+        bottom: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" id="loginPage">
+    <header class="brand" aria-label="华洋达物流" data-i18n-aria="brandName">
+      <div class="logo-mark">HYD</div>
+      <div class="brand-copy">
+        <div class="brand-name" data-i18n="brandName">华洋达物流</div>
+        <div class="brand-subtitle" data-i18n="brandSubtitle">Cross-border Logistics Cloud</div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <section class="hero" aria-label="产品定位" data-i18n-aria="heroAria">
+        <div class="eyebrow"><span class="eyebrow-dot"></span><span data-i18n="heroEyebrow">全球链路协同中台</span></div>
+        <h1 data-i18n="heroTitle">连接订单、关务与全球运输节点</h1>
+        <p data-i18n="heroCopy">面向跨境物流团队的统一登录入口，支持多角色、安全校验和企业协同身份接入。</p>
+        <div class="metric-row" aria-label="业务指标" data-i18n-aria="metricAria">
+          <div class="metric">
+            <strong>120+</strong>
+            <span data-i18n="metricCountries">覆盖国家与地区</span>
+          </div>
+          <div class="metric">
+            <strong>24h</strong>
+            <span data-i18n="metricSync">跨时区订单状态同步</span>
+          </div>
+          <div class="metric">
+            <strong>99.9%</strong>
+            <span data-i18n="metricUptime">核心链路服务可用性</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="login-card" aria-label="登录面板" data-i18n-aria="loginPanelAria">
+        <div class="login-card__top">
+          <h2 data-i18n="loginTitle">欢迎登录</h2>
+          <p data-i18n="loginSubtitle">进入华洋达跨境物流协同平台</p>
+          <div class="tabs" role="tablist" aria-label="登录方式" data-i18n-aria="loginTypeAria">
+            <button class="tab" type="button" role="tab" id="tab-account" aria-selected="true" aria-controls="panel-account" data-tab="account" data-i18n="tabAccount">账号密码</button>
+            <button class="tab" type="button" role="tab" id="tab-phone" aria-selected="false" aria-controls="panel-phone" data-tab="phone" data-i18n="tabPhone">手机号</button>
+            <button class="tab" type="button" role="tab" id="tab-qr" aria-selected="false" aria-controls="panel-qr" data-tab="qr" data-i18n="tabQr">企微二维码</button>
+          </div>
+        </div>
+
+        <div class="login-body">
+          <div class="notice" id="notice" role="status" aria-live="polite">
+            <span class="notice-mark">i</span>
+            <span id="noticeText"></span>
+          </div>
+
+          <form class="panel is-active" id="panel-account" role="tabpanel" aria-labelledby="tab-account" data-panel="account" novalidate>
+            <div class="field">
+              <label for="accountName" data-i18n="accountLabel">账号</label>
+              <div class="input-wrap" data-field="accountName">
+                <input id="accountName" autocomplete="username" placeholder="请输入账号、手机号或邮箱" data-i18n-placeholder="accountPlaceholder">
+              </div>
+              <div class="field-error" data-error-for="accountName"></div>
+            </div>
+
+            <div class="field">
+              <label for="accountPassword" data-i18n="passwordLabel">密码</label>
+              <div class="input-wrap" data-field="accountPassword">
+                <input id="accountPassword" type="password" autocomplete="current-password" placeholder="请输入登录密码" data-i18n-placeholder="passwordPlaceholder">
+                <button class="icon-btn" type="button" id="togglePassword" aria-label="显示密码" title="显示密码" data-i18n-aria="showPassword" data-i18n-title="showPassword">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <div class="field-error" data-error-for="accountPassword"></div>
+            </div>
+
+            <div class="form-options">
+              <label class="check">
+                <input id="remember" type="checkbox" checked>
+                <span class="check-box">✓</span>
+                <span data-i18n="rememberAccount">记住账号</span>
+              </label>
+              <button class="text-btn" type="button" id="forgotPasswordOpen" data-i18n="forgotPassword">忘记密码</button>
+            </div>
+
+            <button class="primary-btn" type="submit" data-submit>
+              <span class="spinner" aria-hidden="true"></span>
+              <span data-i18n="loginButton">登录平台</span>
+            </button>
+          </form>
+
+          <form class="panel" id="panel-phone" role="tabpanel" aria-labelledby="tab-phone" data-panel="phone" novalidate>
+            <div class="field">
+              <label for="phoneNumber" data-i18n="phoneLabel">手机号</label>
+              <div class="input-wrap" data-field="phoneNumber">
+                <span class="input-prefix">+86</span>
+                <input id="phoneNumber" inputmode="numeric" autocomplete="tel" placeholder="请输入手机号" data-i18n-placeholder="phonePlaceholder">
+              </div>
+              <div class="field-error" data-error-for="phoneNumber"></div>
+            </div>
+
+            <div class="field">
+              <label for="smsCode">动态验证码</label>
+              <div class="split-input">
+                <div>
+                  <div class="input-wrap" data-field="smsCode">
+                    <input id="smsCode" autocomplete="off" placeholder="请输入右侧验证码">
+                  </div>
+                  <div class="field-error" data-error-for="smsCode"></div>
+                </div>
+                <button class="captcha-btn" type="button" id="refreshCaptcha" aria-label="点击刷新验证码" title="点击刷新验证码">
+                  <canvas class="captcha-canvas" id="captchaCanvas" width="118" height="48" aria-hidden="true"></canvas>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-options">
+              <span>点击验证码图片可刷新</span>
+              <button class="text-btn" type="button" data-feedback-key="accountInfoFeedback" data-i18n="accountInfo">账号说明</button>
+            </div>
+
+            <button class="primary-btn" type="submit" data-submit>
+              <span class="spinner" aria-hidden="true"></span>
+              <span data-i18n="phoneLoginButton">手机号登录</span>
+            </button>
+          </form>
+
+          <div class="panel" id="panel-qr" role="tabpanel" aria-labelledby="tab-qr" data-panel="qr">
+            <div class="qr-panel">
+              <div class="qr-wrap" id="qrWrap" aria-label="企业微信二维码" data-i18n-aria="qrAria">
+                <div class="qr-code"></div>
+                <span class="qr-corner tl"></span>
+                <span class="qr-corner tr"></span>
+                <span class="qr-corner bl"></span>
+                <div class="qr-state" id="qrState">
+                  <div class="qr-state-inner">
+                    <span id="qrStateText" data-i18n="qrRefreshed">二维码已刷新</span>
+                    <button class="mini-btn" type="button" id="qrInlineRefresh" data-i18n="refresh">刷新</button>
+                  </div>
+                </div>
+              </div>
+              <div class="progress" aria-hidden="true">
+                <div class="progress-bar" id="qrProgress"></div>
+              </div>
+              <p class="qr-title" data-i18n="qrTitle">使用企业微信扫码登录</p>
+              <p class="qr-copy" data-i18n="qrCopy">手机确认后进入平台</p>
+              <div class="qr-actions">
+                <button class="ghost-btn" type="button" id="refreshQr">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M21 12a9 9 0 0 1-15.5 6.2"></path>
+                    <path d="M3 12A9 9 0 0 1 18.5 5.8"></path>
+                    <path d="M18 2v4h4"></path>
+                    <path d="M6 22v-4H2"></path>
+                  </svg>
+                  <span data-i18n="refreshQr">刷新二维码</span>
+                </button>
+                <button class="ghost-btn" type="button" id="simulateScan">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                  </svg>
+                  <span data-i18n="simulateScan">模拟扫码</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider" data-i18n="systemInfo">系统信息</div>
+          <div class="login-meta">
+            <div class="copyright-info">
+              <span data-i18n="versionText">版本号：V1.0.0</span>
+              <span data-i18n="copyrightText">软件著作权登记号：HYD-SR-2026-001 · @版权所属 华洋达物流</span>
+            </div>
+            <div class="language-switch" role="group" aria-label="语言切换" data-i18n-aria="languageAria">
+              <button class="locale-option is-active" type="button" data-locale="zh">简体中文</button>
+              <button class="locale-option" type="button" data-locale="en">English</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="drawer-backdrop" id="forgotBackdrop" hidden></div>
+    <aside class="forgot-drawer" id="forgotDrawer" aria-hidden="true" aria-labelledby="forgotTitle">
+      <div class="drawer-head">
+        <div>
+          <h3 id="forgotTitle" data-i18n="forgotDrawerTitle">找回密码</h3>
+          <p data-i18n="forgotDrawerSubtitle">通过账号校验后重置登录密码</p>
+        </div>
+        <button class="drawer-close" type="button" id="forgotClose" aria-label="关闭" title="关闭" data-i18n-aria="closeDrawer" data-i18n-title="closeDrawer">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="forgot-content">
+        <div class="reset-steps" aria-label="找回密码步骤" data-i18n-aria="forgotStepsAria">
+          <div class="reset-step is-active" data-reset-step="1">
+            <span class="reset-step-dot">1</span>
+            <span data-i18n="forgotStepAccount">确认账号</span>
+          </div>
+          <div class="reset-step" data-reset-step="2">
+            <span class="reset-step-dot">2</span>
+            <span data-i18n="forgotStepVerify">安全校验</span>
+          </div>
+          <div class="reset-step" data-reset-step="3">
+            <span class="reset-step-dot">3</span>
+            <span data-i18n="forgotStepReset">设置密码</span>
+          </div>
+        </div>
+
+        <form id="forgotForm" novalidate>
+          <div class="notice" id="forgotNotice" role="status" aria-live="polite">
+            <span class="notice-mark">i</span>
+            <span id="forgotNoticeText"></span>
+          </div>
+
+          <section class="forgot-step is-active" data-forgot-step="1">
+            <div class="field">
+              <label for="forgotAccount" data-i18n="forgotAccountLabel">账号</label>
+              <div class="input-wrap" data-field="forgotAccount">
+                <input id="forgotAccount" autocomplete="username" placeholder="请输入账号、手机号或邮箱" data-i18n-placeholder="accountPlaceholder">
+              </div>
+              <div class="field-error" data-error-for="forgotAccount"></div>
+            </div>
+            <div class="drawer-actions">
+              <button class="primary-btn" type="button" data-forgot-next="1">
+                <span data-i18n="nextStep">下一步</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="forgot-step" data-forgot-step="2">
+            <div class="field">
+              <label for="forgotCaptcha" data-i18n="forgotCaptchaLabel">图形验证码</label>
+              <div class="split-input">
+                <div>
+                  <div class="input-wrap" data-field="forgotCaptcha">
+                    <input id="forgotCaptcha" autocomplete="off" placeholder="请输入右侧验证码" data-i18n-placeholder="forgotCaptchaPlaceholder">
+                  </div>
+                  <div class="field-error" data-error-for="forgotCaptcha"></div>
+                </div>
+                <button class="captcha-btn" type="button" id="refreshForgotCaptcha" aria-label="点击刷新验证码" title="点击刷新验证码">
+                  <canvas class="captcha-canvas" id="forgotCaptchaCanvas" width="118" height="48" aria-hidden="true"></canvas>
+                </button>
+              </div>
+            </div>
+            <div class="drawer-actions">
+              <button class="ghost-btn" type="button" data-forgot-prev="2" data-i18n="previousStep">上一步</button>
+              <button class="primary-btn" type="button" data-forgot-next="2">
+                <span data-i18n="nextStep">下一步</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="forgot-step" data-forgot-step="3">
+            <div class="field">
+              <label for="newPassword" data-i18n="newPasswordLabel">新密码</label>
+              <div class="input-wrap" data-field="newPassword">
+                <input id="newPassword" type="password" autocomplete="new-password" placeholder="请输入新密码" data-i18n-placeholder="newPasswordPlaceholder">
+              </div>
+              <div class="field-error" data-error-for="newPassword"></div>
+            </div>
+
+            <div class="field">
+              <label for="confirmPassword" data-i18n="confirmPasswordLabel">确认密码</label>
+              <div class="input-wrap" data-field="confirmPassword">
+                <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="请再次输入新密码" data-i18n-placeholder="confirmPasswordPlaceholder">
+              </div>
+              <div class="field-error" data-error-for="confirmPassword"></div>
+            </div>
+
+            <div class="drawer-actions">
+              <button class="ghost-btn" type="button" data-forgot-prev="3" data-i18n="previousStep">上一步</button>
+              <button class="primary-btn" type="submit">
+                <span class="spinner" aria-hidden="true"></span>
+                <span data-i18n="submitReset">确认重置</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="forgot-step" data-forgot-step="4">
+            <div class="success-state">
+              <div class="success-mark">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+              </div>
+              <h4 data-i18n="resetSuccessTitle">密码重置成功</h4>
+              <p data-i18n="resetSuccessCopy">请使用新密码返回登录。</p>
+              <button class="primary-btn" type="button" id="backToLogin">
+                <span data-i18n="backToLogin">返回登录</span>
+              </button>
+            </div>
+          </section>
+        </form>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <strong id="toastTitle" data-i18n="toastDefaultTitle">操作反馈</strong>
+      <span id="toastText" data-i18n="toastDefaultText">已收到操作。</span>
+    </div>
+  </main>
+
+  <aside class="prd-panel login-prd-panel" id="loginPrdPanel" aria-label="登录页PRD产品需求内容">
+    <div class="prd-head">
+      <span class="prd-eyebrow">PRD 产品需求</span>
+      <h2>登录页</h2>
+      <p>登录入口 / 多方式身份校验</p>
+    </div>
+    <div class="prd-scroll">
+      <section class="prd-section">
+        <h3>对应PRD板块</h3>
+        <div class="prd-kv"><span>页面类型</span><b>登录与身份校验原型</b></div>
+        <div class="prd-kv"><span>所属模块</span><b>系统访问入口</b></div>
+        <div class="prd-kv"><span>原型范围</span><b>仅展示登录页交互、找回密码抽屉和进入系统反馈，不连接后端。</b></div>
+      </section>
+      <section class="prd-section">
+        <h3>页面背景及目的</h3>
+        <p>登录页为华洋达跨境物流协同平台的统一访问入口，用于支持账号密码、手机号动态验证码、企业微信扫码三类登录方式，并展示版本号、软件著作权登记号和语言切换能力。</p>
+      </section>
+      <section class="prd-section">
+        <h3>用户及场景</h3>
+        <ul class="prd-list">
+          <li>内部员工使用账号、手机号或企业微信进入系统管理平台。</li>
+          <li>忘记密码时，通过右侧抽屉完成账号确认、安全校验和密码重置。</li>
+          <li>中英文用户在登录页切换语言，仅影响登录页展示文案。</li>
+        </ul>
+      </section>
+      <section class="prd-section">
+        <h3>筛选条件字段</h3>
+        <p class="prd-empty">登录页无列表筛选条件。</p>
+      </section>
+      <section class="prd-section">
+        <h3>按钮与交互逻辑</h3>
+        <div class="prd-action-list">
+          <article><b>登录平台</b><p><span>逻辑：</span>账号密码校验通过后进入系统管理页面。</p><p><span>交互：</span>按钮展示加载态，成功后进入后台首页。</p></article>
+          <article><b>手机号登录</b><p><span>逻辑：</span>校验手机号格式与图形动态验证码。</p><p><span>交互：</span>验证码图片支持点击刷新，输入校验大小写不敏感。</p></article>
+          <article><b>模拟扫码</b><p><span>逻辑：</span>模拟企业微信扫码确认。</p><p><span>交互：</span>二维码状态切换为成功后进入后台首页。</p></article>
+          <article><b>忘记密码</b><p><span>逻辑：</span>打开找回密码抽屉，按步骤校验当前维护字段。</p><p><span>交互：</span>抽屉从右侧向左弹出，支持上一步、下一步和关闭。</p></article>
+          <article><b>语言切换</b><p><span>逻辑：</span>切换简体中文与英文文案。</p><p><span>交互：</span>仅影响登录页文字，不影响系统管理页面。</p></article>
+        </div>
+      </section>
+      <section class="prd-section">
+        <h3>列头字段</h3>
+        <p class="prd-empty">登录页无列表表头字段。</p>
+      </section>
+      <section class="prd-section">
+        <h3>特殊字段取值与交互</h3>
+        <div class="prd-action-list">
+          <article><b>动态验证码</b><p><span>取值逻辑：</span>随机生成 4 位字母数字组合，字母和数字位置随机。</p><p><span>交互：</span>点击验证码图片刷新，输入校验大小写不敏感。</p></article>
+          <article><b>企业微信二维码</b><p><span>取值逻辑：</span>静态原型二维码状态包含刷新、过期和扫码成功。</p><p><span>交互：</span>支持刷新二维码和模拟扫码进入系统。</p></article>
+          <article><b>忘记密码步骤</b><p><span>取值逻辑：</span>确认账号只校验账号输入，安全校验只校验验证码，新密码步骤才校验密码规则。</p><p><span>交互：</span>按 Enter 或按钮提交时只校验当前步骤字段。</p></article>
+        </div>
+      </section>
+      <section class="prd-section">
+        <h3>其他特殊逻辑</h3>
+        <div class="prd-action-list">
+          <article><b>页面尺寸</b><p>登录主页面按右侧 PRD 面板保留 20% 宽度，主登录区域在剩余空间中自适应。</p></article>
+          <article><b>视觉风格</b><p>整体采用亮色物流背景图，保留橙色强调色和国际物流科技感。</p></article>
+          <article><b>进入系统</b><p>三种登录方式成功后都进入系统管理页面，默认展示首页工作台。</p></article>
+        </div>
+      </section>
+      <section class="prd-section">
+        <h3>验收关注</h3>
+        <ul class="prd-list">
+          <li>登录页右侧始终展示 PRD 面板，且不遮挡登录卡片。</li>
+          <li>账号、手机号、企微二维码三种登录方式均可进入系统。</li>
+          <li>忘记密码每一步只校验当前步骤字段。</li>
+        </ul>
+      </section>
+    </div>
+  </aside>
+
+  <main class="admin-app" id="adminApp" hidden></main>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const panels = Array.from(document.querySelectorAll("[data-panel]"));
+    const localeButtons = Array.from(document.querySelectorAll("[data-locale]"));
+    const notice = document.getElementById("notice");
+    const noticeText = document.getElementById("noticeText");
+    const toast = document.getElementById("toast");
+    const toastTitle = document.getElementById("toastTitle");
+    const toastText = document.getElementById("toastText");
+    const password = document.getElementById("accountPassword");
+    const togglePassword = document.getElementById("togglePassword");
+    const captchaCanvas = document.getElementById("captchaCanvas");
+    const refreshCaptcha = document.getElementById("refreshCaptcha");
+    const forgotOpen = document.getElementById("forgotPasswordOpen");
+    const forgotBackdrop = document.getElementById("forgotBackdrop");
+    const forgotDrawer = document.getElementById("forgotDrawer");
+    const forgotClose = document.getElementById("forgotClose");
+    const forgotForm = document.getElementById("forgotForm");
+    const forgotNotice = document.getElementById("forgotNotice");
+    const forgotNoticeText = document.getElementById("forgotNoticeText");
+    const forgotCaptchaCanvas = document.getElementById("forgotCaptchaCanvas");
+    const refreshForgotCaptcha = document.getElementById("refreshForgotCaptcha");
+    const backToLogin = document.getElementById("backToLogin");
+    const qrWrap = document.getElementById("qrWrap");
+    const qrStateText = document.getElementById("qrStateText");
+    const qrProgress = document.getElementById("qrProgress");
+    const refreshQr = document.getElementById("refreshQr");
+    const qrInlineRefresh = document.getElementById("qrInlineRefresh");
+    const simulateScan = document.getElementById("simulateScan");
+
+    const translations = {
+      zh: {
+        brandName: "华洋达物流",
+        brandSubtitle: "跨境物流协同云",
+        heroAria: "产品定位",
+        heroEyebrow: "全球链路协同中台",
+        heroTitle: "连接订单、关务与全球运输节点",
+        heroCopy: "面向跨境物流团队的统一登录入口，支持多角色、安全校验和企业协同身份接入。",
+        metricAria: "业务指标",
+        metricCountries: "覆盖国家与地区",
+        metricSync: "跨时区订单状态同步",
+        metricUptime: "核心链路服务可用性",
+        loginPanelAria: "登录面板",
+        loginTitle: "欢迎登录",
+        loginSubtitle: "进入华洋达跨境物流协同平台",
+        loginTypeAria: "登录方式",
+        tabAccount: "账号密码",
+        tabPhone: "手机号",
+        tabQr: "企微二维码",
+        accountLabel: "账号",
+        accountPlaceholder: "请输入账号、手机号或邮箱",
+        passwordLabel: "密码",
+        passwordPlaceholder: "请输入登录密码",
+        showPassword: "显示密码",
+        hidePassword: "隐藏密码",
+        rememberAccount: "记住账号",
+        forgotPassword: "忘记密码",
+        forgotFeedback: "忘记密码入口仅做原型反馈，不跳转。",
+        forgotDrawerTitle: "找回密码",
+        forgotDrawerSubtitle: "通过账号校验后重置登录密码",
+        closeDrawer: "关闭",
+        forgotStepsAria: "找回密码步骤",
+        forgotStepAccount: "确认账号",
+        forgotStepVerify: "安全校验",
+        forgotStepReset: "设置密码",
+        forgotAccountLabel: "账号",
+        nextStep: "下一步",
+        previousStep: "上一步",
+        forgotCaptchaLabel: "图形验证码",
+        forgotCaptchaPlaceholder: "请输入右侧验证码",
+        newPasswordLabel: "新密码",
+        newPasswordPlaceholder: "请输入新密码",
+        confirmPasswordLabel: "确认密码",
+        confirmPasswordPlaceholder: "请再次输入新密码",
+        submitReset: "确认重置",
+        resetSuccessTitle: "密码重置成功",
+        resetSuccessCopy: "请使用新密码返回登录。",
+        backToLogin: "返回登录",
+        forgotAccountRequired: "请输入账号、手机号或邮箱。",
+        forgotCaptchaRequired: "请输入图形验证码。",
+        forgotCaptchaInvalid: "图形验证码不正确，请重新输入。",
+        resetPasswordInvalid: "新密码至少需要 6 位。",
+        resetPasswordMismatch: "两次输入的密码不一致。",
+        resetSuccessToast: "密码重置流程已完成模拟。",
+        loginButton: "登录平台",
+        phoneLabel: "手机号",
+        phonePlaceholder: "请输入手机号",
+        accountInfo: "账号说明",
+        accountInfoFeedback: "手机号登录会在真实产品中绑定企业账号。",
+        phoneLoginButton: "手机号登录",
+        qrAria: "企业微信二维码",
+        qrRefreshed: "二维码已刷新",
+        qrExpired: "二维码已失效",
+        qrSuccess: "扫码确认成功",
+        refresh: "刷新",
+        qrTitle: "使用企业微信扫码登录",
+        qrCopy: "手机确认后进入平台",
+        refreshQr: "刷新二维码",
+        simulateScan: "模拟扫码",
+        systemInfo: "系统信息",
+        versionText: "版本号：V1.0.0",
+        copyrightText: "软件著作权登记号：HYD-SR-2026-001 · @版权所属 华洋达物流",
+        languageAria: "语言切换",
+        toastDefaultTitle: "操作反馈",
+        toastDefaultText: "已收到操作。",
+        pageFeedbackTitle: "页面反馈",
+        loginFeedbackTitle: "登录反馈",
+        qrToastTitle: "二维码",
+        wecomLoginTitle: "企微登录",
+        passwordToastTitle: "密码显示",
+        languageToastTitle: "语言切换",
+        languageToastText: "页面语言已切换。",
+        accountRequired: "请输入账号。",
+        passwordInvalid: "密码至少需要 6 位。",
+        accountFormInvalid: "请补全必填信息后再提交。",
+        accountLoginSuccess: "账号密码校验通过，即将进入系统管理页面。",
+        accountLoginToast: "正在进入华洋达系统管理平台。",
+        phoneInvalid: "请输入有效的中国大陆手机号。",
+        codeInvalid: "动态验证码不正确，请重新输入。",
+        phoneFormInvalid: "手机号或动态验证码不正确。",
+        phoneLoginSuccess: "手机号和动态验证码验证通过，即将进入系统管理页面。",
+        phoneLoginToast: "正在进入华洋达系统管理平台。",
+        passwordHiddenToast: "已隐藏密码。",
+        passwordVisibleToast: "已显示密码。",
+        qrExpiredToast: "二维码已失效，请刷新后继续。",
+        qrRefreshNotice: "企业微信二维码已刷新。",
+        qrRefreshToast: "已生成新的扫码登录二维码。",
+        qrScanNotice: "企业微信扫码确认成功，即将进入系统管理页面。",
+        qrScanToast: "正在进入华洋达系统管理平台。"
+      },
+      en: {
+        brandName: "Huayangda Logistics",
+        brandSubtitle: "Cross-border Logistics Cloud",
+        heroAria: "Product positioning",
+        heroEyebrow: "Global Route Collaboration Hub",
+        heroTitle: "Connect orders, customs, and global transport nodes",
+        heroCopy: "A unified access point for cross-border logistics teams, with role-based access, security checks, and enterprise identity integration.",
+        metricAria: "Business metrics",
+        metricCountries: "countries and regions covered",
+        metricSync: "cross-time-zone order status sync",
+        metricUptime: "core route service availability",
+        loginPanelAria: "Login panel",
+        loginTitle: "Welcome Back",
+        loginSubtitle: "Sign in to Huayangda Logistics Cloud",
+        loginTypeAria: "Login methods",
+        tabAccount: "Account",
+        tabPhone: "Mobile",
+        tabQr: "WeCom QR",
+        accountLabel: "Account",
+        accountPlaceholder: "Enter account, mobile number, or email",
+        passwordLabel: "Password",
+        passwordPlaceholder: "Enter password",
+        showPassword: "Show password",
+        hidePassword: "Hide password",
+        rememberAccount: "Remember account",
+        forgotPassword: "Forgot password",
+        forgotFeedback: "Forgot password is prototype feedback only. No navigation is performed.",
+        forgotDrawerTitle: "Reset Password",
+        forgotDrawerSubtitle: "Verify your account before setting a new password.",
+        closeDrawer: "Close",
+        forgotStepsAria: "Password reset steps",
+        forgotStepAccount: "Account",
+        forgotStepVerify: "Security Check",
+        forgotStepReset: "New Password",
+        forgotAccountLabel: "Account",
+        nextStep: "Next",
+        previousStep: "Back",
+        forgotCaptchaLabel: "Image Code",
+        forgotCaptchaPlaceholder: "Enter the code on the right",
+        newPasswordLabel: "New Password",
+        newPasswordPlaceholder: "Enter new password",
+        confirmPasswordLabel: "Confirm Password",
+        confirmPasswordPlaceholder: "Enter new password again",
+        submitReset: "Reset Password",
+        resetSuccessTitle: "Password Reset Complete",
+        resetSuccessCopy: "Return to sign in with your new password.",
+        backToLogin: "Back to Login",
+        forgotAccountRequired: "Enter account, mobile number, or email.",
+        forgotCaptchaRequired: "Enter the image code.",
+        forgotCaptchaInvalid: "Image code is incorrect. Please try again.",
+        resetPasswordInvalid: "New password must be at least 6 characters.",
+        resetPasswordMismatch: "The two passwords do not match.",
+        resetSuccessToast: "Password reset flow has been simulated.",
+        loginButton: "Sign In",
+        phoneLabel: "Mobile Number",
+        phonePlaceholder: "Enter mobile number",
+        accountInfo: "Account info",
+        accountInfoFeedback: "Mobile login will be bound to an enterprise account in the real product.",
+        phoneLoginButton: "Mobile Sign In",
+        qrAria: "WeCom QR code",
+        qrRefreshed: "QR code refreshed",
+        qrExpired: "QR code expired",
+        qrSuccess: "Scan confirmed",
+        refresh: "Refresh",
+        qrTitle: "Sign in with WeCom",
+        qrCopy: "Confirm on mobile to enter",
+        refreshQr: "Refresh QR",
+        simulateScan: "Simulate Scan",
+        systemInfo: "System Info",
+        versionText: "Version: V1.0.0",
+        copyrightText: "Software Copyright Reg. No.: HYD-SR-2026-001 · @Copyright Owner Huayangda Logistics",
+        languageAria: "Language switch",
+        toastDefaultTitle: "Feedback",
+        toastDefaultText: "Action received.",
+        pageFeedbackTitle: "Page Feedback",
+        loginFeedbackTitle: "Login Feedback",
+        qrToastTitle: "QR Code",
+        wecomLoginTitle: "WeCom Login",
+        passwordToastTitle: "Password Display",
+        languageToastTitle: "Language",
+        languageToastText: "Page language switched.",
+        accountRequired: "Enter your account.",
+        passwordInvalid: "Password must be at least 6 characters.",
+        accountFormInvalid: "Complete the required fields before submitting.",
+        accountLoginSuccess: "Account and password verified. Entering the system management page.",
+        accountLoginToast: "Opening Huayangda system management platform.",
+        phoneInvalid: "Enter a valid mainland China mobile number.",
+        codeInvalid: "Dynamic code is incorrect. Please try again.",
+        phoneFormInvalid: "Mobile number or dynamic code is incorrect.",
+        phoneLoginSuccess: "Mobile number and dynamic code verified. Entering the system management page.",
+        phoneLoginToast: "Opening Huayangda system management platform.",
+        passwordHiddenToast: "Password hidden.",
+        passwordVisibleToast: "Password shown.",
+        qrExpiredToast: "QR code expired. Refresh to continue.",
+        qrRefreshNotice: "WeCom QR code refreshed.",
+        qrRefreshToast: "A new scan login QR code has been generated.",
+        qrScanNotice: "WeCom scan confirmed. Entering the system management page.",
+        qrScanToast: "Opening Huayangda system management platform."
+      }
+    };
+
+    let toastTimer;
+    let qrTimer;
+    let qrRemaining = 60;
+    let currentLocale = "zh";
+    let activeNotice = null;
+    let activeToast = null;
+    let activeForgotNotice = null;
+    let phoneCaptcha = "";
+    let forgotCaptcha = "";
+    let forgotStep = 1;
+
+    const t = (key) => translations[currentLocale][key] || translations.zh[key] || key;
+
+    const generateCaptchaCode = () => {
+      const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+      const numbers = "23456789";
+      const pool = letters + numbers;
+      const chars = [
+        letters[Math.floor(Math.random() * letters.length)],
+        numbers[Math.floor(Math.random() * numbers.length)]
+      ];
+
+      while (chars.length < 4) {
+        chars.push(pool[Math.floor(Math.random() * pool.length)]);
+      }
+
+      return chars
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map((item) => item.value)
+        .join("");
+    };
+
+    const drawCaptcha = (canvas, code) => {
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, "#fff8f0");
+      gradient.addColorStop(1, "#ffe2bd");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      for (let i = 0; i < 18; i += 1) {
+        ctx.fillStyle = `rgba(${80 + Math.random() * 90}, ${88 + Math.random() * 80}, ${110 + Math.random() * 70}, 0.18)`;
+        ctx.beginPath();
+        ctx.arc(Math.random() * width, Math.random() * height, 1 + Math.random() * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      for (let i = 0; i < 4; i += 1) {
+        ctx.strokeStyle = i % 2 === 0 ? "rgba(255, 138, 29, 0.5)" : "rgba(68, 99, 140, 0.32)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * width, Math.random() * height);
+        ctx.bezierCurveTo(Math.random() * width, Math.random() * height, Math.random() * width, Math.random() * height, Math.random() * width, Math.random() * height);
+        ctx.stroke();
+      }
+
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+      ctx.font = "800 24px Segoe UI, Arial, sans-serif";
+
+      [...code].forEach((char, index) => {
+        const x = 22 + index * 24 + (Math.random() * 4 - 2);
+        const y = height / 2 + (Math.random() * 8 - 4);
+        const angle = (Math.random() * 0.42) - 0.21;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = index % 2 === 0 ? "#172033" : "#c96710";
+        ctx.fillText(char, 0, 0);
+        ctx.restore();
+      });
+    };
+
+    const refreshPhoneCaptcha = () => {
+      phoneCaptcha = generateCaptchaCode();
+      drawCaptcha(captchaCanvas, phoneCaptcha);
+    };
+
+    const refreshForgotCaptchaCode = () => {
+      forgotCaptcha = generateCaptchaCode();
+      drawCaptcha(forgotCaptchaCanvas, forgotCaptcha);
+    };
+
+    const updatePasswordToggleLabel = () => {
+      const key = password.type === "text" ? "hidePassword" : "showPassword";
+      togglePassword.setAttribute("aria-label", t(key));
+      togglePassword.setAttribute("title", t(key));
+    };
+
+    const applyTranslations = () => {
+      document.documentElement.lang = currentLocale === "zh" ? "zh-CN" : "en";
+
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        el.textContent = t(el.dataset.i18n);
+      });
+
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+      });
+
+      document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+        el.setAttribute("aria-label", t(el.dataset.i18nAria));
+      });
+
+      document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+        el.setAttribute("title", t(el.dataset.i18nTitle));
+      });
+
+      localeButtons.forEach((button) => {
+        const active = button.dataset.locale === currentLocale;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+      if (activeNotice) {
+        noticeText.textContent = t(activeNotice.key);
+      }
+
+      if (activeForgotNotice) {
+        forgotNoticeText.textContent = t(activeForgotNotice.key);
+      }
+
+      if (activeToast) {
+        toastTitle.textContent = t(activeToast.titleKey);
+        toastText.textContent = t(activeToast.textKey);
+      }
+
+      updatePasswordToggleLabel();
+    };
+
+    const showToast = (titleKey, textKey) => {
+      activeToast = { titleKey, textKey };
+      toastTitle.textContent = t(titleKey);
+      toastText.textContent = t(textKey);
+      toast.classList.add("is-visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("is-visible");
+        activeToast = null;
+      }, 2600);
+    };
+
+    const setNotice = (type, key) => {
+      activeNotice = { type, key };
+      notice.className = "notice is-visible";
+      if (type === "error") notice.classList.add("is-error");
+      if (type === "success") notice.classList.add("is-success");
+      noticeText.textContent = t(key);
+    };
+
+    const clearNotice = () => {
+      activeNotice = null;
+      notice.className = "notice";
+      noticeText.textContent = "";
+    };
+
+    const setForgotNotice = (type, key) => {
+      activeForgotNotice = { type, key };
+      forgotNotice.className = "notice is-visible";
+      if (type === "error") forgotNotice.classList.add("is-error");
+      if (type === "success") forgotNotice.classList.add("is-success");
+      forgotNoticeText.textContent = t(key);
+    };
+
+    const clearForgotNotice = () => {
+      activeForgotNotice = null;
+      forgotNotice.className = "notice";
+      forgotNoticeText.textContent = "";
+    };
+
+    const setQrState = (key) => {
+      qrStateText.dataset.i18n = key;
+      qrStateText.textContent = t(key);
+    };
+
+    const setForgotStep = (step) => {
+      forgotStep = step;
+      document.querySelectorAll("[data-forgot-step]").forEach((panel) => {
+        panel.classList.toggle("is-active", Number(panel.dataset.forgotStep) === step);
+      });
+
+      document.querySelectorAll("[data-reset-step]").forEach((item) => {
+        const stepNumber = Number(item.dataset.resetStep);
+        item.classList.toggle("is-active", stepNumber === step);
+        item.classList.toggle("is-complete", stepNumber < step || step === 4);
+      });
+
+      clearForgotNotice();
+      clearFieldErrors();
+    };
+
+    const resetForgotForm = () => {
+      forgotForm.reset();
+      setForgotStep(1);
+      refreshForgotCaptchaCode();
+    };
+
+    const openForgotDrawer = () => {
+      forgotBackdrop.hidden = false;
+      forgotDrawer.setAttribute("aria-hidden", "false");
+      resetForgotForm();
+      requestAnimationFrame(() => {
+        forgotBackdrop.classList.add("is-open");
+        forgotDrawer.classList.add("is-open");
+      });
+      setTimeout(() => document.getElementById("forgotAccount").focus(), 260);
+    };
+
+    const closeForgotDrawer = () => {
+      forgotBackdrop.classList.remove("is-open");
+      forgotDrawer.classList.remove("is-open");
+      forgotDrawer.setAttribute("aria-hidden", "true");
+      setTimeout(() => {
+        if (!forgotDrawer.classList.contains("is-open")) {
+          forgotBackdrop.hidden = true;
+        }
+      }, 260);
+    };
+
+    const validateForgotStep = (step) => {
+      clearForgotNotice();
+      clearFieldErrors();
+
+      if (step === 1) {
+        const account = document.getElementById("forgotAccount").value.trim();
+        if (!account) {
+          setFieldError("forgotAccount", t("forgotAccountRequired"));
+          setForgotNotice("error", "forgotAccountRequired");
+          return false;
+        }
+        return true;
+      }
+
+      if (step === 2) {
+        const value = document.getElementById("forgotCaptcha").value.trim();
+        if (!value) {
+          setFieldError("forgotCaptcha", t("forgotCaptchaRequired"));
+          setForgotNotice("error", "forgotCaptchaRequired");
+          return false;
+        }
+        if (value.toUpperCase() !== forgotCaptcha.toUpperCase()) {
+          setFieldError("forgotCaptcha", t("forgotCaptchaInvalid"));
+          setForgotNotice("error", "forgotCaptchaInvalid");
+          refreshForgotCaptchaCode();
+          document.getElementById("forgotCaptcha").value = "";
+          return false;
+        }
+        return true;
+      }
+
+      const newPassword = document.getElementById("newPassword").value.trim();
+      const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+      if (newPassword.length < 6) {
+        setFieldError("newPassword", t("resetPasswordInvalid"));
+        setForgotNotice("error", "resetPasswordInvalid");
+        return false;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setFieldError("confirmPassword", t("resetPasswordMismatch"));
+        setForgotNotice("error", "resetPasswordMismatch");
+        return false;
+      }
+
+      return true;
+    };
+
+    const setActiveTab = (name) => {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === name;
+        tab.setAttribute("aria-selected", String(active));
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.panel === name);
+      });
+
+      const qrActive = name === "qr";
+      document.documentElement.classList.toggle("login-qr-mode", qrActive);
+      document.body.classList.toggle("login-qr-mode", qrActive);
+      loginPage.classList.toggle("is-qr-active", qrActive);
+
+      clearNotice();
+      clearFieldErrors();
+
+      if (qrActive) {
+        startQrTimer();
+      } else {
+        stopQrTimer();
+      }
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setActiveTab(tab.dataset.tab));
+    });
+
+    const clearFieldErrors = () => {
+      document.querySelectorAll(".input-wrap").forEach((wrap) => wrap.classList.remove("is-invalid"));
+      document.querySelectorAll("[data-error-for]").forEach((el) => {
+        el.textContent = "";
+      });
+    };
+
+    const setFieldError = (field, message) => {
+      const wrap = document.querySelector(`[data-field="${field}"]`);
+      const error = document.querySelector(`[data-error-for="${field}"]`);
+      if (wrap) wrap.classList.add("is-invalid");
+      if (error) error.textContent = message;
+    };
+
+    const runLoading = (button, done) => {
+      button.disabled = true;
+      button.classList.add("is-loading");
+      setTimeout(() => {
+        button.disabled = false;
+        button.classList.remove("is-loading");
+        done();
+      }, 900);
+    };
+
+    document.getElementById("panel-account").addEventListener("submit", (event) => {
+      event.preventDefault();
+      clearFieldErrors();
+      clearNotice();
+
+      const account = document.getElementById("accountName").value.trim();
+      const pwd = password.value.trim();
+      let valid = true;
+
+      if (!account) {
+        setFieldError("accountName", t("accountRequired"));
+        valid = false;
+      }
+
+      if (pwd.length < 6) {
+        setFieldError("accountPassword", t("passwordInvalid"));
+        valid = false;
+      }
+
+      if (!valid) {
+        setNotice("error", "accountFormInvalid");
+        return;
+      }
+
+      const submitButton = event.submitter || event.currentTarget.querySelector("[data-submit]");
+      runLoading(submitButton, () => {
+        setNotice("success", "accountLoginSuccess");
+        showToast("loginFeedbackTitle", "accountLoginToast");
+        setTimeout(() => window.AdminApp?.enter("account"), 450);
+      });
+    });
+
+    document.getElementById("panel-phone").addEventListener("submit", (event) => {
+      event.preventDefault();
+      clearFieldErrors();
+      clearNotice();
+
+      const phone = document.getElementById("phoneNumber").value.trim();
+      const code = document.getElementById("smsCode").value.trim();
+      let valid = true;
+
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        setFieldError("phoneNumber", t("phoneInvalid"));
+        valid = false;
+      }
+
+      if (code.toUpperCase() !== phoneCaptcha.toUpperCase()) {
+        setFieldError("smsCode", t("codeInvalid"));
+        valid = false;
+      }
+
+      if (!valid) {
+        setNotice("error", "phoneFormInvalid");
+        return;
+      }
+
+      const submitButton = event.submitter || event.currentTarget.querySelector("[data-submit]");
+      runLoading(submitButton, () => {
+        setNotice("success", "phoneLoginSuccess");
+        showToast("loginFeedbackTitle", "phoneLoginToast");
+        refreshPhoneCaptcha();
+        document.getElementById("smsCode").value = "";
+        setTimeout(() => window.AdminApp?.enter("phone"), 450);
+      });
+    });
+
+    togglePassword.addEventListener("click", () => {
+      const visible = password.type === "text";
+      password.type = visible ? "password" : "text";
+      updatePasswordToggleLabel();
+      showToast("passwordToastTitle", visible ? "passwordHiddenToast" : "passwordVisibleToast");
+    });
+
+    refreshCaptcha.addEventListener("click", () => {
+      refreshPhoneCaptcha();
+      document.getElementById("smsCode").value = "";
+      clearFieldErrors();
+    });
+
+    refreshForgotCaptcha.addEventListener("click", () => {
+      refreshForgotCaptchaCode();
+      document.getElementById("forgotCaptcha").value = "";
+      clearFieldErrors();
+    });
+
+    forgotOpen.addEventListener("click", openForgotDrawer);
+    forgotClose.addEventListener("click", closeForgotDrawer);
+    forgotBackdrop.addEventListener("click", closeForgotDrawer);
+    backToLogin.addEventListener("click", closeForgotDrawer);
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && forgotDrawer.classList.contains("is-open")) {
+        closeForgotDrawer();
+      }
+    });
+
+    document.querySelectorAll("[data-forgot-next]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (validateForgotStep(Number(button.dataset.forgotNext))) {
+          setForgotStep(Number(button.dataset.forgotNext) + 1);
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-forgot-prev]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setForgotStep(Number(button.dataset.forgotPrev) - 1);
+      });
+    });
+
+    forgotForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (forgotStep < 3) {
+        if (validateForgotStep(forgotStep)) {
+          setForgotStep(forgotStep + 1);
+        }
+        return;
+      }
+
+      if (forgotStep !== 3) return;
+
+      if (!validateForgotStep(3)) return;
+
+      const submitButton = event.submitter || event.currentTarget.querySelector('[type="submit"]');
+      runLoading(submitButton, () => {
+        setForgotStep(4);
+        showToast("loginFeedbackTitle", "resetSuccessToast");
+      });
+    });
+
+    document.querySelectorAll("[data-feedback-key]").forEach((button) => {
+      button.addEventListener("click", () => {
+        showToast("pageFeedbackTitle", button.dataset.feedbackKey);
+      });
+    });
+
+    localeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.dataset.locale === currentLocale) return;
+        currentLocale = button.dataset.locale;
+        applyTranslations();
+        showToast("languageToastTitle", "languageToastText");
+      });
+    });
+
+    const stopQrTimer = () => {
+      clearInterval(qrTimer);
+    };
+
+    const startQrTimer = () => {
+      stopQrTimer();
+      qrRemaining = 60;
+      qrWrap.classList.remove("is-expired", "is-success");
+      setQrState("qrRefreshed");
+      qrProgress.style.transform = "scaleX(1)";
+
+      qrTimer = setInterval(() => {
+        qrRemaining -= 1;
+        qrProgress.style.transform = `scaleX(${Math.max(qrRemaining / 60, 0)})`;
+
+        if (qrRemaining <= 0) {
+          stopQrTimer();
+          qrWrap.classList.add("is-expired");
+          setQrState("qrExpired");
+          showToast("qrToastTitle", "qrExpiredToast");
+        }
+      }, 1000);
+    };
+
+    const refreshQrCode = () => {
+      startQrTimer();
+      setNotice("success", "qrRefreshNotice");
+      showToast("qrToastTitle", "qrRefreshToast");
+    };
+
+    refreshQr.addEventListener("click", refreshQrCode);
+    qrInlineRefresh.addEventListener("click", refreshQrCode);
+
+    simulateScan.addEventListener("click", () => {
+      stopQrTimer();
+      qrWrap.classList.remove("is-expired");
+      qrWrap.classList.add("is-success");
+      setQrState("qrSuccess");
+      qrProgress.style.transform = "scaleX(1)";
+      setNotice("success", "qrScanNotice");
+      showToast("wecomLoginTitle", "qrScanToast");
+      setTimeout(() => window.AdminApp?.enter("wecom"), 450);
+    });
+
+    refreshPhoneCaptcha();
+    refreshForgotCaptchaCode();
+    applyTranslations();
+  </script>
+  <script src="./admin.js"></script>
+</body>
+</html>
